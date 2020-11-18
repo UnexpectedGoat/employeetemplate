@@ -10,6 +10,106 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+const handleManager = (name, id, email, employees) => {
+    inquirer.prompt([{
+        type: "input",
+        message: "What's your office number?",
+        name: "officeNumber"
+    }]).then(answers => {
+        const employee = new Manager(name, id, email, answers.officeNumber)
+        employees.push(employee);
+        repeatQuestions(employees);
+    })
+}
+const handleEngineer = (name, id, email, employees) => {
+    inquirer.prompt([{
+        type: "input",
+        message: "What's your github?",
+        name: "github"
+    }]).then(answers => {
+        const employee = new Engineer(name, id, email, answers.github)
+        employees.push(employee);
+        repeatQuestions(employees);
+    })
+}
+const handleIntern = (name, id, email, employees) => {
+    inquirer.prompt([{
+        type: "input",
+        message: "What's your school?",
+        name: "school"
+    }]).then(answers => {
+        const employee = new Intern(name, id, email, answers.school)
+        employees.push(employee);
+        repeatQuestions(employees);
+    })
+}
+
+const repeatQuestions = (employees) => {
+    inquirer.prompt([{
+        type: "confirm",
+        message: "Do you want to add another employee?",
+        name: "repeat"
+    }]).then(answers => {
+        if (answers.repeat) {
+            getInformationAboutEmployee(employees);
+        }
+        const html=render(employees);
+        if (!fs.existsSync(OUTPUT_DIR)){
+           fs.mkdirSync(OUTPUT_DIR) 
+        }
+        fs.writeFileSync(outputPath, html, "utf-8"); 
+    })
+}
+
+
+const getInformationAboutEmployee = (employees) => {
+    console.log(employees);
+    inquirer.prompt([{
+        type: "input",
+        message: "What's your name?",
+        name: "name"
+    }, {
+        type: "input",
+        message: "What's your email?",
+        name: "email"
+    }, {
+        type: "input",
+        message: "What's your id?",
+        name: "id"
+    }, {
+        type: "list",
+        message: "What's your role?",
+        name: "role",
+        choices: ["Manager", "Engineer", "Intern"]
+    }]).then(answers => {
+        console.log(answers);
+        switch (answers.role) {
+            case "Manager":
+                handleManager(answers.name, answers.id, answers.email, employees);
+
+                break;
+            case "Engineer":
+                handleEngineer(answers.name, answers.id, answers.email, employees)
+ 
+                break;
+            case "Intern":
+                handleIntern(answers.name, answers.id, answers.email, employees)
+   
+                break;
+
+            default:
+                break;
+        }
+    })
+}
+
+
+const main = () => {
+    const employees =[]
+    getInformationAboutEmployee(employees);
+}
+
+main();
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
